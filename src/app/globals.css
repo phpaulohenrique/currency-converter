@@ -1,4 +1,6 @@
 @tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 /* Chrome, Safari, Edge, Opera */
 input::-webkit-outer-spin-button,
@@ -13,5 +15,4 @@ input[type=number] {
   -moz-appearance: textfield;
 }
 
-@tailwind components;
-@tailwind utilities;
+

@@ -2,7 +2,7 @@ import { ReactNode } from 'react'
 import './globals.css'
 
 export const metadata = {
-    title: 'PH Currency',
+    title: 'PH Currency Converter',
 }
 
 export default function RootLayout({ children }: { children: ReactNode }) {
