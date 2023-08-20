@@ -107,19 +107,22 @@ const getCurrencies = async () => {
 const currenciesSymbols = getCurrencies()
 
 export default function Home() {
-    const { register, setValue, handleSubmit, getValues, watch } = useForm<IFormInputs>({
+    const { register, setValue, handleSubmit, getValues } = useForm<IFormInputs>({
         defaultValues: {
             convertFrom: { amount: 1, code: 'USD' },
             convertTo: { amount: null, code: 'BRL' },
         },
     })
 
-    const b = watch('convertFrom')
-
     const currSymbols = use(currenciesSymbols)
 
+    const getCurrencyHistoric = async () => {
+        const response = await fetch(
+            `https://api.exchangerate.host/timeseries?start_date=2023-08-01&end_date=2023-08-10&base=USD&symbols=BRL`
+        )
+    }
+
     const InvertCurrencyType = () => {
-        // console.log(getValues('convertFrom.code'))
         const fromCode = getValues('convertFrom.code')
         const toCode = getValues('convertTo.code')
 
@@ -129,31 +132,16 @@ export default function Home() {
     }
 
     const onSubmit = async (data: IFormInputs) => {
-        console.log(data)
         const currencyFrom = data.convertFrom
         const currencyTo = data.convertTo
-        console.log(currSymbols)
+
         const response = await fetch(
             `https://api.exchangerate.host/convert?from=${currencyFrom.code}&to=${currencyTo.code}&amount=${currencyFrom.amount}`
         )
         const datares = await response.json()
-        // console.log(datares.result)
-        // setCurrentCurrencyAmount(() => 4.97)
         setValue('convertTo.amount', datares.result.toFixed(2))
-
-        // console.log(touchedFields.convertFrom)
-        // console.log(touchedFields.convertTo)
-        // console.log(dirtyFields)
-        console.log(b)
-
-        // if (touchedFields.convertFrom) {
-        //     setValue('convertTo.amount', 4.97)
-        // } else if (touchedFields.convertTo) {
-        //     setValue('convertFrom.amount', 10)
-        // }
     }
 
-    // console.log(response);
     return (
         <main className="grid grid-cols-[2fr_1fr] bg-green-100/60 font-sans h-screen">
             <div className="bg-gray-50 w-full border-yellow-400/50 border-r drop-shadow-2xl flex flex-col items-center py-8 px-8 ">
@@ -162,7 +150,7 @@ export default function Home() {
                         className="flex flex-col items-center justify-center"
                         onSubmit={handleSubmit(onSubmit)}
                     >
-                        <div className="flex flex-row gap-3 justify-start mt-14">
+                        <div className="flex flex-row gap-4 justify-start mt-14">
                             <div>
                                 <label className="rounded-md border-2 border-green-500/30 flex justify-start p-2 focus-within:border-green-600">
                                     <input
@@ -174,7 +162,7 @@ export default function Home() {
                                     <select
                                         {...register('convertFrom.code')}
                                         defaultValue="USD"
-                                        className="truncate ml-1 flex-1 px-1 bg-transparent focus:outline-none border border-transparent focus-within:border-green-600 rounded max-w-[120px] text-sm"
+                                        className="truncate ml-1 flex-1 px-1 bg-transparent focus:outline-none border border-transparent focus-within:border-green-600 rounded max-w-[8rem] text-sm"
                                     >
                                         {currSymbols?.map((currency) => (
                                             <option
@@ -193,24 +181,25 @@ export default function Home() {
                             </div>
                             <button
                                 title="Invert the currency type"
-                                className="py-1 px-2 bg-green-200 rounded-md border border-green-400 hover:bg-green-300 group group-hover:transition-colors self-center "
+                                className="py-1 px-3 bg-green-200 rounded-md border border-green-400 hover:bg-green-300 group group-hover:transition-colors self-center "
                                 type="button"
                                 onClick={InvertCurrencyType}
                             >
-                                <ArrowLeftRight className="w-6 h-6 text-green-600 group-hover:text-green-700" />
+                                <ArrowLeftRight className="w-5 h-5 text-green-600 group-hover:text-green-700" />
                             </button>
                             <div className="flex flex-row gap-2">
                                 <label className="rounded-md border-2 border-green-500/30 flex justify-start p-2 focus-within:border-green-700">
                                     <input
                                         type="number"
                                         step="0.01"
+                                        placeholder="1"
                                         disabled
                                         className="p-1 bg-transparent  border-sky-600 max-w-[7rem] focus:outline-none text-green-950  disabled:bg-gray-200 rounded hover:cursor-not-allowed"
                                         {...register('convertTo.amount')}
                                     />
                                     <select
                                         {...register('convertTo.code')}
-                                        className="ml-1 flex-1 px-1 bg-transparent focus:outline-none border border-transparent focus-within:border-green-500 rounded max-w-[120px] text-sm"
+                                        className="ml-1 flex-1 px-1 bg-transparent focus:outline-none border border-transparent focus-within:border-green-500 rounded max-w-[8rem] text-sm"
                                     >
                                         {currSymbols?.map((currency) => (
                                             <option
@@ -229,20 +218,20 @@ export default function Home() {
 
                         <button
                             type="submit"
-                            className="self-start mt-6 bg-green-100 rounded-md border border-green-400 hover:bg-green-300 text-emerald-8000 px-4 py-1 flex gap-1 items-center text-green-950"
+                            className="self-start mt-4 bg-green-200 rounded-md border border-green-400 hover:bg-green-300 text-emerald-8000 px-4 py-1 flex gap-1 items-center text-green-950"
                         >
                             <Calculator className="w-5 h-5 text-green-600" />
                             Convert
                         </button>
                     </form>
 
-                    <div className="bg-gray-100 h-80 mt-8">
+                    <div className="bg-gray-100 h-80 mt-20">
                         <Chart options={options} series={series} type="area" height="200px" />
                     </div>
                 </div>
             </div>
 
-            <div className="flex justify-center items-center mt-12">
+            <div className="flex justify-center items-center">
                 <div className="flex text-center gap-1">
                     <CircleDollarSign className="w-11 h-11 text-amber-400 bg-amber-100 rounded-full " />
                     <h1 className="text-4xl font-bold font-serif text-green-700 ">BR Converter</h1>
