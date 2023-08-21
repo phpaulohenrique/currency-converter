@@ -6,14 +6,13 @@ import { use } from 'react'
 import { ArrowLeftRight, Calculator, CircleDollarSign } from 'lucide-react'
 import { ApexOptions } from 'apexcharts'
 import dynamic from 'next/dynamic'
-import { type } from 'os'
 // import Image from 'next/image'
 const Chart = dynamic(() => import('react-apexcharts'), {
     ssr: false,
 })
 interface IFormInputs {
+    convertFrom: { amount: number; code: string }
     convertTo: { amount: number | null; code: string }
-    convertFrom: { amount: number | null; code: string }
 }
 interface ICurrenciesSymbols {
     description: string
@@ -22,6 +21,11 @@ interface ICurrenciesSymbols {
 
 interface ICurrenciesSymbolsResponse {
     symbols: ICurrenciesSymbols[]
+}
+
+interface IGetConvertion{
+        currencyFrom: {code: string; amount: number}
+        currencyTo: {code: string;}
 }
 
 const options: ApexOptions = {
@@ -74,37 +78,20 @@ const options: ApexOptions = {
 
 const series = [{ name: 'series1', data: [10, 5, 20, 30, 10, 5] }]
 
-const getCurrencies = async () => {
+const getCurrenciesSymbols = async () => {
     const maxAgeInSeconds = 3600 * 24 // 24 h
-    // const response = await api.get('/currencies', {
-    //     params: {
-    //         apikey: 'P24ngfzWvm30bpz37oFi08afTbOCy2ZbiqDM1Mcs',
-    //     },
-    //     headers: {
-    //         'Cache-control': `max-age=${maxAgeInSeconds}`
-    //     }
-
-    // })
 
     const data = await fetch('https://api.exchangerate.host/symbols', {
-        method: 'GET',
         next: { revalidate: maxAgeInSeconds },
-
-        headers: {
-            // 'access_key': 'a27fe82aaaf2f0988d27c893bbfc22f8',
-            // 'cache': 'force-cache'
-        },
     })
 
     const currencies: ICurrenciesSymbolsResponse = await data.json()
     const currenciesSymbols = Object.entries(currencies.symbols).map(([key, value]) => value)
 
-    // console.log(currenciesSymbols)
-
     return currenciesSymbols
 }
 
-const currenciesSymbols = getCurrencies()
+const currenciesSymbols = getCurrenciesSymbols()
 
 export default function Home() {
     const { register, setValue, handleSubmit, getValues } = useForm<IFormInputs>({
@@ -122,6 +109,15 @@ export default function Home() {
         )
     }
 
+    const getConvertion  = async ({currencyFrom, currencyTo}: IGetConvertion) => {
+        const response = await fetch(
+            `https://api.exchangerate.host/convert?from=${currencyFrom.code}&to=${currencyTo.code}&amount=${currencyFrom.amount}`
+        )
+        const data = await response.json()
+        return data.result.toFixed(2)
+
+    }
+
     const InvertCurrencyType = () => {
         const fromCode = getValues('convertFrom.code')
         const toCode = getValues('convertTo.code')
@@ -135,11 +131,12 @@ export default function Home() {
         const currencyFrom = data.convertFrom
         const currencyTo = data.convertTo
 
-        const response = await fetch(
-            `https://api.exchangerate.host/convert?from=${currencyFrom.code}&to=${currencyTo.code}&amount=${currencyFrom.amount}`
-        )
-        const datares = await response.json()
-        setValue('convertTo.amount', datares.result.toFixed(2))
+        if(!currencyFrom.amount){
+            return alert('Fill the field amount to the conversion.')
+        }
+        
+        const result = await getConvertion({currencyFrom, currencyTo})
+        setValue('convertTo.amount', result)
     }
 
     return (
@@ -175,13 +172,11 @@ export default function Home() {
                                             </option>
                                         ))}
                                     </select>
-
-                                    {/* <GetCurrencies /> */}
                                 </label>
                             </div>
                             <button
                                 title="Invert the currency type"
-                                className="py-1 px-3 bg-green-200 rounded-md border border-green-400 hover:bg-green-300 group group-hover:transition-colors self-center "
+                                className="py-1 px-3 bg-green-100 rounded-md border border-green-400 hover:bg-green-300 group group-hover:transition-colors self-center "
                                 type="button"
                                 onClick={InvertCurrencyType}
                             >
