@@ -2,10 +2,11 @@
 import { useForm } from 'react-hook-form'
 // import { GetCurrencies } from './components/GetCurrencies'
 // import { api } from '@/lib/axios'
-import { use } from 'react'
+import { use, useState } from 'react'
 import { ArrowLeftRight, Calculator, CircleDollarSign } from 'lucide-react'
 import { ApexOptions } from 'apexcharts'
 import dynamic from 'next/dynamic'
+import { generateDates } from '@/utils/generateDates'
 // import Image from 'next/image'
 const Chart = dynamic(() => import('react-apexcharts'), {
     ssr: false,
@@ -23,10 +24,31 @@ interface ICurrenciesSymbolsResponse {
     symbols: ICurrenciesSymbols[]
 }
 
-interface IGetConvertion{
-        currencyFrom: {code: string; amount: number}
-        currencyTo: {code: string;}
+interface IGetConversion {
+    currencyFrom: { code: string; amount: number }
+    currencyTo: { code: string }
 }
+
+// interface IGetCurrencyHistory<T>{
+//     T: string
+// }
+
+// interface IGetCurrencyHistoryResponse<T>{
+//     rates: {
+//         T: IGetCurrencyHistory
+//     }
+// }
+
+interface ICurrencyRatesHistoryResponse {
+    rates: {
+        [date: string]: {
+            [currency: string]: number
+        }
+    }
+}
+
+const generatedDates = generateDates()
+console.log(generatedDates)
 
 const options: ApexOptions = {
     chart: {
@@ -45,7 +67,7 @@ const options: ApexOptions = {
         enabled: false,
     },
     tooltip: {
-        enabled: false,
+        enabled: true,
     },
     xaxis: {
         type: 'datetime',
@@ -55,28 +77,20 @@ const options: ApexOptions = {
         axisTicks: {
             color: '#C3C3C6',
         },
-        categories: [
-            '2022-01-10T00:00.000Z',
-            '2022-01-12T00:00.000Z',
-            '2022-01-13T00:00.000Z',
-            '2022-01-15T00:00.000Z',
-            '2022-01-16T00:00.000Z',
-            '2022-01-23T00:00.000Z',
-        ],
+
+        categories: generatedDates.dates,
     },
     fill: {
         opacity: 0.3,
-        colors: ['#15803d', '#1e3a8a'],
+        // colors: ['#15803d', '#1e3a8a'],
         type: 'gradient',
         gradient: {
             shade: 'dark',
             opacityFrom: 0.7,
-            opacityTo: 0.2,
+            opacityTo: 0.1,
         },
     },
 }
-
-const series = [{ name: 'series1', data: [10, 5, 20, 30, 10, 5] }]
 
 const getCurrenciesSymbols = async () => {
     const maxAgeInSeconds = 3600 * 24 // 24 h
@@ -101,24 +115,34 @@ export default function Home() {
         },
     })
 
+    const [currencyHistory, setCurrencyHistory] = useState<number[]>([])
+    const series = [{ name: 'Conversion value', data: currencyHistory }]
     const currSymbols = use(currenciesSymbols)
 
-    const getCurrencyHistoric = async () => {
+    const getCurrencyHistoric = async (base: string, symbol: string) => {
         const response = await fetch(
-            `https://api.exchangerate.host/timeseries?start_date=2023-08-01&end_date=2023-08-10&base=USD&symbols=BRL`
+            `https://api.exchangerate.host/timeseries?start_date=${generatedDates.fromDate}&end_date=${generatedDates.toDate}&base=${base}&symbols=${symbol}`
         )
+        const data: ICurrencyRatesHistoryResponse = await response.json()
+
+        const currencyHistory = Object.entries(data.rates).map(([key, value]) => value)
+        const currencyHistoryFormatted = currencyHistory
+            .map((obj) => obj[symbol])
+            .map((value) => Number(value.toFixed(2)))
+        setCurrencyHistory(currencyHistoryFormatted)
+        // series['data'] = [...currencyHistoryFormatted]
+        console.log(currencyHistoryFormatted)
     }
 
-    const getConvertion  = async ({currencyFrom, currencyTo}: IGetConvertion) => {
+    const getConversion = async ({ currencyFrom, currencyTo }: IGetConversion) => {
         const response = await fetch(
             `https://api.exchangerate.host/convert?from=${currencyFrom.code}&to=${currencyTo.code}&amount=${currencyFrom.amount}`
         )
         const data = await response.json()
         return data.result.toFixed(2)
-
     }
 
-    const InvertCurrencyType = () => {
+    const invertCurrencyType = () => {
         const fromCode = getValues('convertFrom.code')
         const toCode = getValues('convertTo.code')
 
@@ -131,17 +155,23 @@ export default function Home() {
         const currencyFrom = data.convertFrom
         const currencyTo = data.convertTo
 
-        if(!currencyFrom.amount){
+        if (!currencyFrom.amount) {
             return alert('Fill the field amount to the conversion.')
         }
-        
-        const result = await getConvertion({currencyFrom, currencyTo})
-        setValue('convertTo.amount', result)
+
+        try {
+            const result = await getConversion({ currencyFrom, currencyTo })
+            setValue('convertTo.amount', result)
+            // console.log(generateDates())
+            getCurrencyHistoric(currencyFrom.code, currencyTo.code)
+        } catch {
+            alert('Ops.. something went wrong. Try again later.')
+        }
     }
 
     return (
-        <main className="grid grid-cols-[2fr_1fr] bg-green-100/60 font-sans h-screen">
-            <div className="bg-gray-50 w-full border-yellow-400/50 border-r drop-shadow-2xl flex flex-col items-center py-8 px-8 ">
+        <main className="grid grid-cols-[2fr_1fr] bg-blue-100/40 font-sans h-screen">
+            <div className="bg-gray-50 w-full border-green-400/50 border-r drop-shadow-2xl flex flex-col items-center py-8 px-2 ">
                 <div>
                     <form
                         className="flex flex-col items-center justify-center"
@@ -176,9 +206,9 @@ export default function Home() {
                             </div>
                             <button
                                 title="Invert the currency type"
-                                className="py-1 px-3 bg-green-100 rounded-md border border-green-400 hover:bg-green-300 group group-hover:transition-colors self-center "
+                                className="py-1 px-3 bg-green-50 rounded-md border border-green-400 hover:bg-green-300 group group-hover:transition-colors self-center "
                                 type="button"
-                                onClick={InvertCurrencyType}
+                                onClick={invertCurrencyType}
                             >
                                 <ArrowLeftRight className="w-5 h-5 text-green-600 group-hover:text-green-700" />
                             </button>
@@ -194,7 +224,7 @@ export default function Home() {
                                     />
                                     <select
                                         {...register('convertTo.code')}
-                                        className="ml-1 flex-1 px-1 bg-transparent focus:outline-none border border-transparent focus-within:border-green-500 rounded max-w-[8rem] text-sm"
+                                        className="truncate ml-1 flex-1 px-1 bg-transparent focus:outline-none border border-transparent focus-within:border-green-500 rounded max-w-[8rem] text-sm"
                                     >
                                         {currSymbols?.map((currency) => (
                                             <option
@@ -213,23 +243,28 @@ export default function Home() {
 
                         <button
                             type="submit"
-                            className="self-start mt-4 bg-green-200 rounded-md border border-green-400 hover:bg-green-300 text-emerald-8000 px-4 py-1 flex gap-1 items-center text-green-950"
+                            className="self-start mt-4 bg-emerald-600 rounded-md border border-green-500 hover:bg-emerald-700 text-white px-4 py-1 flex gap-1 items-center font-medium"
                         >
-                            <Calculator className="w-5 h-5 text-green-600" />
+                            <Calculator className="w-5 h-5 text-white" />
                             Convert
                         </button>
                     </form>
 
-                    <div className="bg-gray-100 h-80 mt-20">
-                        <Chart options={options} series={series} type="area" height="200px" />
-                    </div>
+                    {!!currencyHistory.length && (
+                        <div className=" mt-20 w-full rounded-lg shadow-md bg-white p-4">
+                            <h2 className="text-2xl mb-4 text-sky-700 font-medium ">
+                                Currency Variation Graph
+                            </h2>
+                            <Chart options={options} series={series} type="area" height="240px" />
+                        </div>
+                    )}
                 </div>
             </div>
 
             <div className="flex justify-center items-center">
                 <div className="flex text-center gap-1">
                     <CircleDollarSign className="w-11 h-11 text-amber-400 bg-amber-100 rounded-full " />
-                    <h1 className="text-4xl font-bold font-serif text-green-700 ">BR Converter</h1>
+                    <h1 className="text-4xl font-medium text-blue-800 ">BR Converter</h1>
                 </div>
                 {/* <Image src="/money.jpg" alt="" width={300} height={300} /> */}
             </div>

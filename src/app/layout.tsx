@@ -5,7 +5,7 @@ import './globals.css'
 export const metadata = {
     title: 'BR Currency Converter',
 }
-const inter = Inter({ subsets: ['latin'], display: 'swap' })
+const inter = Inter({ subsets: ['latin'] })
 
 export default function RootLayout({ children }: { children: ReactNode }) {
     return (
