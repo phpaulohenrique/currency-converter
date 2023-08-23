@@ -1,13 +1,10 @@
 'use client'
 import { useForm } from 'react-hook-form'
-// import { GetCurrencies } from './components/GetCurrencies'
-// import { api } from '@/lib/axios'
 import { use, useState } from 'react'
 import { ArrowLeftRight, Calculator, CircleDollarSign } from 'lucide-react'
 import { ApexOptions } from 'apexcharts'
 import dynamic from 'next/dynamic'
-import { generateDates } from '@/utils/generateDates'
-// import Image from 'next/image'
+import { generateDates } from '../utils/generateDates'
 const Chart = dynamic(() => import('react-apexcharts'), {
     ssr: false,
 })
@@ -29,16 +26,6 @@ interface IGetConversion {
     currencyTo: { code: string }
 }
 
-// interface IGetCurrencyHistory<T>{
-//     T: string
-// }
-
-// interface IGetCurrencyHistoryResponse<T>{
-//     rates: {
-//         T: IGetCurrencyHistory
-//     }
-// }
-
 interface ICurrencyRatesHistoryResponse {
     rates: {
         [date: string]: {
@@ -50,7 +37,7 @@ interface ICurrencyRatesHistoryResponse {
 const generatedDates = generateDates()
 console.log(generatedDates)
 
-const options: ApexOptions = {
+const apexChartsOptions: ApexOptions = {
     chart: {
         toolbar: {
             show: false,
@@ -58,7 +45,7 @@ const options: ApexOptions = {
         zoom: {
             enabled: false,
         },
-        foreColor: '#14532d',
+        foreColor: '#16a34a',
     },
     grid: {
         show: false,
@@ -72,22 +59,22 @@ const options: ApexOptions = {
     xaxis: {
         type: 'datetime',
         axisBorder: {
-            color: '#C3C3C6',
+            color: '#475569',
         },
         axisTicks: {
-            color: '#C3C3C6',
+            color: '#475569',
         },
 
         categories: generatedDates.dates,
     },
     fill: {
         opacity: 0.3,
-        // colors: ['#15803d', '#1e3a8a'],
+        // colors: ['#0284c7'],
         type: 'gradient',
         gradient: {
             shade: 'dark',
-            opacityFrom: 0.7,
-            opacityTo: 0.1,
+            opacityFrom: 0.8,
+            opacityTo: 0.2,
         },
     },
 }
@@ -116,7 +103,7 @@ export default function Home() {
     })
 
     const [currencyHistory, setCurrencyHistory] = useState<number[]>([])
-    const series = [{ name: 'Conversion value', data: currencyHistory }]
+    const chartValues = [{ name: 'Conversion value', data: currencyHistory }]
     const currSymbols = use(currenciesSymbols)
 
     const getCurrencyHistoric = async (base: string, symbol: string) => {
@@ -165,7 +152,7 @@ export default function Home() {
             // console.log(generateDates())
             getCurrencyHistoric(currencyFrom.code, currencyTo.code)
         } catch {
-            alert('Ops.. something went wrong. Try again later.')
+            alert('Ops... something went wrong. Please, Try again later.')
         }
     }
 
@@ -183,6 +170,7 @@ export default function Home() {
                                     <input
                                         type="number"
                                         step="0.01"
+                                        placeholder="1"
                                         className="p-1 bg-transparent border-r-[1px] border-sky-600 max-w-[7rem] focus:outline-none"
                                         {...register('convertFrom.amount')}
                                     />
@@ -252,10 +240,19 @@ export default function Home() {
 
                     {!!currencyHistory.length && (
                         <div className=" mt-20 w-full rounded-lg shadow-md bg-white p-4">
-                            <h2 className="text-2xl mb-4 text-sky-700 font-medium ">
-                                Currency Variation Graph
-                            </h2>
-                            <Chart options={options} series={series} type="area" height="240px" />
+                            <div className="ml-3">
+                                <h2 className="text-2xl text-sky-600 ">Currency variation</h2>
+                                <span className="text-sm block text-gray-600 mb-4">
+                                    Last 15 days
+                                </span>
+                            </div>
+
+                            <Chart
+                                options={apexChartsOptions}
+                                series={chartValues}
+                                type="area"
+                                height="260px"
+                            />
                         </div>
                     )}
                 </div>
@@ -263,10 +260,9 @@ export default function Home() {
 
             <div className="flex justify-center items-center">
                 <div className="flex text-center gap-1">
-                    <CircleDollarSign className="w-11 h-11 text-amber-400 bg-amber-100 rounded-full " />
-                    <h1 className="text-4xl font-medium text-blue-800 ">BR Converter</h1>
+                    <CircleDollarSign className="w-11 h-11 text-amber-400 rounded-full " />
+                    <h1 className="text-3xl font-medium  text-sky-700 ">The BR Converter</h1>
                 </div>
-                {/* <Image src="/money.jpg" alt="" width={300} height={300} /> */}
             </div>
         </main>
     )

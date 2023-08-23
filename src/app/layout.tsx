@@ -3,7 +3,7 @@ import { ReactNode } from 'react'
 import './globals.css'
 
 export const metadata = {
-    title: 'BR Currency Converter',
+    title: 'The BR Currency Converter',
 }
 const inter = Inter({ subsets: ['latin'] })
 

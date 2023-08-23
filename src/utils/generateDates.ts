@@ -11,7 +11,8 @@ export function generateDates() {
     let currentDate = Date.now() // in ms
     const dates = [new Date(currentDate)]
 
-    for (let i = 1; i <= 6; i++) {
+    const totalAmountDays = 15 // to generate the chart with days
+    for (let i = 1; i <= totalAmountDays; i++) {
         currentDate = currentDate - millisecondsPerDay
         dates.push(new Date(currentDate))
     }
@@ -19,8 +20,6 @@ export function generateDates() {
     const datesFormatted = dates.reverse().map((date) => String(date))
     const fromDate = formatDate(dates[0])
     const toDate = formatDate(dates[dates.length - 1])
-
-    // console.log(dates.reverse().map(date => String(date)))
 
     return { dates: datesFormatted, fromDate, toDate }
 }
