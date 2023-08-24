@@ -1,4 +1,4 @@
-<h1 align="center">BR Currency Converter</h1>
+<h1 align="center">The BR Currency Converter</h1>
 
 
 ✔️ Mobile Responsive
