@@ -158,14 +158,14 @@ export default function Home() {
     }
 
     return (
-        <main className="grid grid-cols-[2fr_1fr] bg-blue-100/40 font-sans h-screen">
-            <div className="bg-gray-50 w-full border-green-400/50 border-r drop-shadow-2xl flex flex-col items-center py-8 px-2 ">
+        <main className="grid grid-cols-1 md:grid-cols-[2fr_1fr]  bg-blue-100/40 font-sans h-screen">
+            <div className="bg-gray-50 w-full h-full pt-8 border-green-400/50 border-r drop-shadow-2xl flex flex-col items-center">
                 <div>
                     <form
                         className="flex flex-col items-center justify-center"
                         onSubmit={handleSubmit(onSubmit)}
                     >
-                        <div className="flex flex-row gap-4 justify-start mt-14">
+                        <div className="flex flex-col md:flex-row gap-4 justify-start mt-14">
                             <div>
                                 <label className="rounded-md border-2 border-green-500/30 flex justify-start p-2 focus-within:border-green-600">
                                     <input
@@ -232,7 +232,7 @@ export default function Home() {
 
                         <button
                             type="submit"
-                            className="self-start mt-4 bg-emerald-600 rounded-md border border-green-500 hover:bg-emerald-700 text-white px-4 py-1 flex gap-1 items-center font-medium"
+                            className="md:self-start mt-4 bg-emerald-600 rounded-md border border-green-500 hover:bg-emerald-700 text-white px-4 py-1 flex gap-1 items-center font-medium"
                         >
                             <Calculator className="w-5 h-5 text-white" />
                             Convert
@@ -259,7 +259,7 @@ export default function Home() {
                 </div>
             </div>
 
-            <div className="flex justify-center items-center">
+            <div className="justify-center items-center hidden md:flex">
                 <div className="flex text-center gap-1">
                     <CircleDollarSign className="w-11 h-11 text-amber-400 rounded-full " />
                     <h1 className="text-3xl font-medium  text-sky-700 ">The BR Converter</h1>
