@@ -115,7 +115,7 @@ export default function Home() {
         const currencyHistory = Object.entries(data.rates).map(([key, value]) => value)
         const currencyHistoryFormatted = currencyHistory
             .map((obj) => obj[symbol])
-            .map((value) => Number(value.toFixed(2)))
+            .map((value) => Number(value.toFixed(3)))
         setCurrencyHistory(currencyHistoryFormatted)
         // series['data'] = [...currencyHistoryFormatted]
         console.log(currencyHistoryFormatted)
@@ -151,8 +151,9 @@ export default function Home() {
             setValue('convertTo.amount', result)
             // console.log(generateDates())
             getCurrencyHistoric(currencyFrom.code, currencyTo.code)
-        } catch {
+        } catch(error) {
             alert('Ops... something went wrong. Please, Try again later.')
+            console.log(error)
         }
     }
 
