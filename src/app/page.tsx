@@ -167,7 +167,7 @@ export default function Home() {
                 width={600}
                 height={600}
                 alt=""
-                className="absolute right-0 bottom-0 "
+                className="absolute right-0 -bottom-4 "
             />
 
             <main className="bg-gray-100/30 font-sans h-screen pt-8 md:pl-20 flex flex-col items-center md:items-start">
@@ -243,7 +243,8 @@ export default function Home() {
 
                         <button
                             type="submit"
-                            className="md:self-start mt-6 md:mt-4 rounded-md bg-gradient-to-r from-sky-600 via-green-600 to-green-700 hover:brightness-110 text-white px-4 py-1 flex gap-1 items-center font-medium"
+                            title="Convert"
+                            className="md:self-start mt-6 md:mt-4 rounded-md bg-gradient-to-r from-sky-600 via-green-600 to-green-800 hover:brightness-110 text-white px-5 py-1 flex gap-1 items-center font-medium"
                         >
                             <Calculator className="w-5 h-5 text-white" />
                             Convert
@@ -251,9 +252,14 @@ export default function Home() {
                     </form>
 
                     {!!currencyHistory.length && (
-                        <div className=" mt-10 w-full rounded-lg shadow-md bg-white p-4 border border-green-200">
-                            <div className="ml-3">
-                                <h2 className="text-2xl text-sky-600 ">Currency variation</h2>
+                        <div
+                            className=" mt-10 w-full rounded-lg shadow-lg shadow-gray-300 bg-white p-4 border border-green-300"
+                            title="Chart currency variation"
+                        >
+                            <div className="">
+                                <h2 className="text-xl text-sky-800 font-bold ">
+                                    Currency Variation
+                                </h2>
                                 <span className="text-sm block text-gray-600 mb-4">
                                     Last 15 days
                                 </span>
@@ -269,13 +275,6 @@ export default function Home() {
                     )}
                 </div>
             </main>
-
-            {/* <div className="justify-center items-center hidden md:flex">
-                <div className="flex text-center gap-1">
-                    <CircleDollarSign className="w-11 h-11 text-amber-400 rounded-full " />
-                    <h1 className="text-3xl font-medium  text-sky-700 ">The BR Converter</h1>
-                </div>
-            </div> */}
         </>
     )
 }
