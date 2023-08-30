@@ -1,10 +1,11 @@
 'use client'
 import { useForm } from 'react-hook-form'
 import { use, useState } from 'react'
-import { ArrowLeftRight, Calculator, CircleDollarSign } from 'lucide-react'
+import { ArrowLeftRight, Calculator } from 'lucide-react'
 import { ApexOptions } from 'apexcharts'
 import dynamic from 'next/dynamic'
 import { generateDates } from '../utils/generateDates'
+import Image from 'next/image'
 const Chart = dynamic(() => import('react-apexcharts'), {
     ssr: false,
 })
@@ -158,14 +159,25 @@ export default function Home() {
     }
 
     return (
-        <main className="grid grid-cols-1 md:grid-cols-[2fr_1fr]  bg-blue-100/40 font-sans h-screen">
-            <div className="bg-gray-50 w-full h-full pt-8 border-green-400/50 border-r drop-shadow-2xl flex flex-col items-center">
+        <>
+            <header className="bg-gray-100 fixed px-4 md:px-10 py-3 top-0 left-0 w-full shadow-md shadow-gray-300">
+                <Image src="/logo.svg" width={180} height={20} alt="The Currency Converter Logo" />
+            </header>
+            <Image
+                src="line.svg"
+                width={600}
+                height={600}
+                alt=""
+                className="absolute right-0 -bottom-4 "
+            />
+
+            <main className="bg-gray-100/30 font-sans h-screen pt-8 md:pl-20 flex flex-col items-center md:items-start">
                 <div>
                     <form
                         className="flex flex-col items-center justify-center"
                         onSubmit={handleSubmit(onSubmit)}
                     >
-                        <div className="flex flex-col md:flex-row gap-4 justify-start mt-14">
+                        <div className="flex flex-col md:flex-row gap-3 md:gap-4 justify-start mt-14">
                             <div>
                                 <label className="rounded-md border-2 border-green-500/30 flex justify-start p-2 focus-within:border-green-600">
                                     <input
@@ -232,7 +244,8 @@ export default function Home() {
 
                         <button
                             type="submit"
-                            className="md:self-start mt-4 bg-emerald-600 rounded-md border border-green-500 hover:bg-emerald-700 text-white px-4 py-1 flex gap-1 items-center font-medium"
+                            title="Convert"
+                            className="md:self-start mt-6 md:mt-4 rounded-md bg-gradient-to-r from-sky-600 via-green-600 to-green-800 hover:brightness-110 text-white px-5 py-1 flex gap-1 items-center font-medium"
                         >
                             <Calculator className="w-5 h-5 text-white" />
                             Convert
@@ -240,9 +253,14 @@ export default function Home() {
                     </form>
 
                     {!!currencyHistory.length && (
-                        <div className=" mt-20 w-full rounded-lg shadow-md bg-white p-4">
-                            <div className="ml-3">
-                                <h2 className="text-2xl text-sky-600 ">Currency variation</h2>
+                        <div
+                            className=" mt-10 w-full rounded-lg shadow-lg shadow-gray-300 bg-white p-4 border border-green-300"
+                            title="Chart currency variation"
+                        >
+                            <div className="">
+                                <h2 className="text-xl text-sky-800 font-bold ">
+                                    Currency Variation
+                                </h2>
                                 <span className="text-sm block text-gray-600 mb-4">
                                     Last 15 days
                                 </span>
@@ -252,19 +270,12 @@ export default function Home() {
                                 options={apexChartsOptions}
                                 series={chartValues}
                                 type="area"
-                                height="260px"
+                                height="280px"
                             />
                         </div>
                     )}
                 </div>
-            </div>
-
-            <div className="justify-center items-center hidden md:flex">
-                <div className="flex text-center gap-1">
-                    <CircleDollarSign className="w-11 h-11 text-amber-400 rounded-full " />
-                    <h1 className="text-3xl font-medium  text-sky-700 ">The BR Converter</h1>
-                </div>
-            </div>
-        </main>
+            </main>
+        </>
     )
 }
