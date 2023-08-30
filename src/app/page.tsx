@@ -144,15 +144,14 @@ export default function Home() {
         const currencyTo = data.convertTo
 
         if (!currencyFrom.amount) {
-            return alert('Fill the field amount to the conversion.')
+            return alert('Fill in the field from amount.')
         }
 
         try {
             const result = await getConversion({ currencyFrom, currencyTo })
             setValue('convertTo.amount', result)
-            // console.log(generateDates())
             getCurrencyHistoric(currencyFrom.code, currencyTo.code)
-        } catch(error) {
+        } catch (error) {
             alert('Ops... something went wrong. Please, Try again later.')
             console.log(error)
         }
@@ -168,22 +167,22 @@ export default function Home() {
                 width={600}
                 height={600}
                 alt=""
-                className="absolute right-0 -bottom-4 "
+                className="absolute right-0 bottom-0 opacity-60 md:opacity-80"
             />
 
-            <main className="bg-gray-100/30 font-sans h-screen pt-8 md:pl-20 flex flex-col items-center md:items-start">
+            <main className="bg-gray-100/30 font-sans h-screen pt-8 md:pl-20 flex flex-col items-center md:items-start max-h-screen">
                 <div>
                     <form
                         className="flex flex-col items-center justify-center"
                         onSubmit={handleSubmit(onSubmit)}
                     >
-                        <div className="flex flex-col md:flex-row gap-3 md:gap-4 justify-start mt-14">
+                        <div className="flex flex-col md:flex-row gap-3 md:gap-4 justify-start mt-24">
                             <div>
                                 <label className="rounded-md border-2 border-green-500/30 flex justify-start p-2 focus-within:border-green-600">
                                     <input
                                         type="number"
                                         step="0.01"
-                                        placeholder="1"
+                                        placeholder="From $"
                                         className="p-1 bg-transparent border-r-[1px] border-sky-600 max-w-[7rem] focus:outline-none"
                                         {...register('convertFrom.amount')}
                                     />
@@ -214,18 +213,18 @@ export default function Home() {
                                 <ArrowLeftRight className="w-5 h-5 text-green-600 group-hover:text-green-700" />
                             </button>
                             <div className="flex flex-row gap-2">
-                                <label className="rounded-md border-2 border-green-500/30 flex justify-start p-2 focus-within:border-green-700">
+                                <label className="rounded-md border-2 border-green-500/30 flex justify-start p-2 focus-within:border-green-600">
                                     <input
                                         type="number"
                                         step="0.01"
-                                        placeholder="1"
+                                        placeholder="To $"
                                         disabled
                                         className="p-1 bg-transparent  border-sky-600 max-w-[7rem] focus:outline-none text-green-950  disabled:bg-gray-200 rounded hover:cursor-not-allowed"
                                         {...register('convertTo.amount')}
                                     />
                                     <select
                                         {...register('convertTo.code')}
-                                        className="truncate ml-1 flex-1 px-1 bg-transparent focus:outline-none border border-transparent focus-within:border-green-500 rounded max-w-[8rem] text-sm"
+                                        className="truncate ml-1 flex-1 px-1 bg-transparent focus:outline-none border border-transparent focus-within:border-green-600 rounded max-w-[8rem] text-sm"
                                     >
                                         {currSymbols?.map((currency) => (
                                             <option
@@ -258,7 +257,7 @@ export default function Home() {
                             title="Chart currency variation"
                         >
                             <div className="">
-                                <h2 className="text-xl text-sky-800 font-bold ">
+                                <h2 className="text-xl text-sky-600 font-medium ">
                                     Currency Variation
                                 </h2>
                                 <span className="text-sm block text-gray-600 mb-4">
