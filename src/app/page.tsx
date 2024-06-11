@@ -7,6 +7,10 @@ import { ApexOptions } from 'apexcharts'
 import dynamic from 'next/dynamic'
 import { generateDates } from '../utils/generateDates'
 import Image from 'next/image'
+import { api } from '@/lib/axios'
+
+const API_KEY = process.env.NEXT_PUBLIC_API_KEY
+
 const Chart = dynamic(() => import('react-apexcharts'), {
     ssr: false,
 })
@@ -31,16 +35,16 @@ interface IGetConversion {
     currencyTo: { code: string }
 }
 
+interface CurrencyValue {
+    [currencyCode: string]: number
+}
+
 interface ICurrencyRatesHistoryResponse {
-    rates: {
-        [date: string]: {
-            [currency: string]: number
-        }
-    }
+    [date: string]: CurrencyValue
 }
 
 const generatedDates = generateDates()
-console.log(generatedDates)
+// console.log(generatedDates)
 
 const apexChartsOptions: ApexOptions = {
     chart: {
@@ -83,9 +87,7 @@ const apexChartsOptions: ApexOptions = {
         },
     },
 }
-const header = {
-    apiKey: 'H6E8VtRi1i0YJ4aOSfGU5bqkyMk9DuI1',
-}
+
 // const getCurrenciesSymbols = async () => {
 //     const maxAgeInSeconds = 3600 * 24 // 24 h
 
@@ -115,33 +117,37 @@ export default function Home() {
     // const currSymbols = use(currenciesSymbols)
 
     const getCurrencyHistoric = async (base: string, symbol: string) => {
-        const response = await fetch(
-            `https://api.exchangerate.host/timeseries?start_date=${generatedDates.fromDate}&end_date=${generatedDates.toDate}&base=${base}&symbols=${symbol}`
-        )
-        const data: ICurrencyRatesHistoryResponse = await response.json()
+        const response = await api.get('timeseries', {
+            params: {
+                api_key: API_KEY,
+                base,
+                symbols: symbol,
+                start_date: generatedDates.fromDate,
+                end_date: generatedDates.toDate,
+            },
+        })
 
-        const currencyHistory = Object.entries(data.rates).map(([key, value]) => value)
-        const currencyHistoryFormatted = currencyHistory
-            .map((obj) => obj[symbol])
-            .map((value) => Number(value.toFixed(3)))
-        setCurrencyHistory(currencyHistoryFormatted)
-        // series['data'] = [...currencyHistoryFormatted]
-        console.log(currencyHistoryFormatted)
+        const data: ICurrencyRatesHistoryResponse = response.data.response
+
+        const currencyHistory = Object.values(data)
+            .flatMap((currencyValueObj) => Object.values(currencyValueObj))
+            .map((value) => +Number(value).toFixed(3))
+
+        // console.log(currencyHistory)
+        setCurrencyHistory(currencyHistory)
     }
 
     const getConversion = async ({ currencyFrom, currencyTo }: IGetConversion) => {
-        const response = await fetch(
-            // `https://api.exchangerate.host/convert?from=${currencyFrom.code}&to=${currencyTo.code}&amount=${currencyFrom.amount}`
-            `https://api.apilayer.com/currency_data/convert?base=${currencyFrom.code}&symbols=${currencyTo.code}&amount=${currencyFrom.amount}&date=${generatedDates.fromDate}`,
-            {
-                method: 'GET',
-                headers: header,
-            }
-        )
+        const response = await api.get('convert', {
+            params: {
+                api_key: API_KEY,
+                from: currencyFrom.code,
+                to: currencyTo.code,
+                amount: currencyFrom.amount,
+            },
+        })
 
-        console.log(response)
-        const data = await response.json()
-        return data.result.toFixed(2)
+        return Number(response.data.value.toFixed(3))
     }
 
     const invertCurrencyType = () => {
@@ -156,6 +162,7 @@ export default function Home() {
     const onSubmit = async (data: IFormInputs) => {
         const currencyFrom = data.convertFrom
         const currencyTo = data.convertTo
+        // const currencyTo = {
 
         if (!currencyFrom.amount) {
             return alert('Fill in the field from amount.')
