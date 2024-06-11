@@ -1,6 +1,7 @@
 'use client'
+import { currencies, ICurrencies } from '../../currencies'
 import { useForm } from 'react-hook-form'
-import { use, useState } from 'react'
+import { useState } from 'react'
 import { ArrowLeftRight, Calculator } from 'lucide-react'
 import { ApexOptions } from 'apexcharts'
 import dynamic from 'next/dynamic'
@@ -13,14 +14,17 @@ interface IFormInputs {
     convertFrom: { amount: number; code: string }
     convertTo: { amount: number | null; code: string }
 }
-interface ICurrenciesSymbols {
-    description: string
-    code: string
-}
 
-interface ICurrenciesSymbolsResponse {
-    symbols: ICurrenciesSymbols[]
-}
+// comented because the api that i was using is not returning the currencies codes anymore.
+
+// interface ICurrenciesSymbols {
+//     description: string
+//     code: string
+// }
+
+// interface ICurrenciesSymbolsResponse {
+//     symbols: ICurrenciesSymbols[]
+// }
 
 interface IGetConversion {
     currencyFrom: { code: string; amount: number }
@@ -79,21 +83,24 @@ const apexChartsOptions: ApexOptions = {
         },
     },
 }
-
-const getCurrenciesSymbols = async () => {
-    const maxAgeInSeconds = 3600 * 24 // 24 h
-
-    const data = await fetch('https://api.exchangerate.host/symbols', {
-        next: { revalidate: maxAgeInSeconds },
-    })
-
-    const currencies: ICurrenciesSymbolsResponse = await data.json()
-    const currenciesSymbols = Object.entries(currencies.symbols).map(([key, value]) => value)
-
-    return currenciesSymbols
+const header = {
+    apiKey: 'H6E8VtRi1i0YJ4aOSfGU5bqkyMk9DuI1',
 }
+// const getCurrenciesSymbols = async () => {
+//     const maxAgeInSeconds = 3600 * 24 // 24 h
 
-const currenciesSymbols = getCurrenciesSymbols()
+//     const data = await fetch(`http://api.exchangerate.host/live${}symbols`, {
+//         next: { revalidate: maxAgeInSeconds },
+//     })
+
+//     const currencies: ICurrenciesSymbolsResponse = await data.json()
+//     const currenciesSymbols = Object.entries(currencies.symbols).map(([key, value]) => value)
+
+//     return currenciesSymbols
+// }
+
+// const currenciesSymbols = getCurrenciesSymbols()
+const currenciesSymbols: ICurrencies = currencies
 
 export default function Home() {
     const { register, setValue, handleSubmit, getValues } = useForm<IFormInputs>({
@@ -105,7 +112,7 @@ export default function Home() {
 
     const [currencyHistory, setCurrencyHistory] = useState<number[]>([])
     const chartValues = [{ name: 'Conversion value', data: currencyHistory }]
-    const currSymbols = use(currenciesSymbols)
+    // const currSymbols = use(currenciesSymbols)
 
     const getCurrencyHistoric = async (base: string, symbol: string) => {
         const response = await fetch(
@@ -124,8 +131,15 @@ export default function Home() {
 
     const getConversion = async ({ currencyFrom, currencyTo }: IGetConversion) => {
         const response = await fetch(
-            `https://api.exchangerate.host/convert?from=${currencyFrom.code}&to=${currencyTo.code}&amount=${currencyFrom.amount}`
+            // `https://api.exchangerate.host/convert?from=${currencyFrom.code}&to=${currencyTo.code}&amount=${currencyFrom.amount}`
+            `https://api.apilayer.com/currency_data/convert?base=${currencyFrom.code}&symbols=${currencyTo.code}&amount=${currencyFrom.amount}&date=${generatedDates.fromDate}`,
+            {
+                method: 'GET',
+                headers: header,
+            }
         )
+
+        console.log(response)
         const data = await response.json()
         return data.result.toFixed(2)
     }
@@ -191,14 +205,14 @@ export default function Home() {
                                         defaultValue="USD"
                                         className="truncate ml-1 flex-1 px-1 bg-transparent focus:outline-none border border-transparent focus-within:border-green-600 rounded max-w-[8rem] text-sm"
                                     >
-                                        {currSymbols?.map((currency) => (
+                                        {currenciesSymbols?.map((currency) => (
                                             <option
-                                                value={currency.code}
-                                                key={currency.code}
-                                                title={currency.description}
+                                                value={currency.currency_code}
+                                                key={currency.country}
+                                                title={currency.country}
                                                 className="text-xs"
                                             >
-                                                {currency.code} - {currency.description}
+                                                {currency.currency_code} - {currency.country}
                                             </option>
                                         ))}
                                     </select>
@@ -226,14 +240,14 @@ export default function Home() {
                                         {...register('convertTo.code')}
                                         className="truncate ml-1 flex-1 px-1 bg-transparent focus:outline-none border border-transparent focus-within:border-green-600 rounded max-w-[8rem] text-sm"
                                     >
-                                        {currSymbols?.map((currency) => (
+                                        {currenciesSymbols?.map((currency) => (
                                             <option
-                                                value={currency.code}
-                                                key={currency.code}
-                                                title={currency.description}
+                                                value={currency.currency_code}
+                                                key={currency.country}
+                                                title={currency.country}
                                                 className="text-xs"
                                             >
-                                                {currency.code} - {currency.description}
+                                                {currency.currency_code} - {currency.country}
                                             </option>
                                         ))}
                                     </select>
