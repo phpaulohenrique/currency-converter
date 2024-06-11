@@ -664,7 +664,7 @@ export const currencies: ICurrencies = [
     },
     {
         country: 'Palestine',
-        currency_code: null,
+        currency_code: '',
     },
     {
         country: 'Panama',
