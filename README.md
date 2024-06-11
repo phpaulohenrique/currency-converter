@@ -4,7 +4,7 @@
 ✔️ Mobile Responsive
 <br>
 <br>
-This project is consuming an public API to generate the conversions: https://exchangerate.host
+This project is consuming an public API to generate the conversions: https://currencybeacon.com/
 
 
 ## Technologies 🔧
